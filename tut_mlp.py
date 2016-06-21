@@ -16,12 +16,12 @@ from sklearn.metrics import accuracy_score
 
 image_size = 28
 num_labels = 10
-force_training = False
+force_training = True
 model_file = 'theano_MLP.model'
 beta = 0.01
 batch_size = 100
-num_epochs = 30
-report_freq = 1
+num_epochs = 60
+report_freq = 5
 
 
 train_dataset, train_labels, \
@@ -44,6 +44,10 @@ def load_model():
   except IOError:
     clf = None
   except KeyError:
+    clf = None
+  except pkl.UnpicklingError:
+    clf = None
+  except EOFError:
     clf = None
 
   if clf is None:

@@ -146,9 +146,8 @@ class _MLPModel(object):
         # negative log likelihood of the MLP is given by the negative
         # log likelihood of the output of the model, computed in the
         # logistic regression layer
-        self.negative_log_likelihood = self.logRegressionLayer.negative_log_likelihood
         # same holds for the function computing the number of errors
-        self.errors = self.logRegressionLayer.errors
+        #self.errors = self.logRegressionLayer.errors
 
         # the parameters of the model are the parameters of the two layer it is
         # made out of
@@ -162,6 +161,12 @@ class _MLPModel(object):
 
         # keep track of model input
         self.d_input = d_input
+
+    def negative_log_likelihood(self, y):
+        # negative log likelihood of the MLP is given by the negative
+        # log likelihood of the output of the model, computed in the
+        # logistic regression layer
+        return self.logRegressionLayer.negative_log_likelihood(y)
 
 
 class MLP(object):

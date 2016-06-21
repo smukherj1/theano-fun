@@ -40,6 +40,10 @@ def load_model():
     clf = None
   except KeyError:
     clf = None
+  except pkl.UnpicklingError:
+    clf = None
+  except EOFError:
+    clf = None
 
   if clf is None:
     logging.info('Could not load model from disk. Will need to run training')
