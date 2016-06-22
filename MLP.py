@@ -86,7 +86,7 @@ class _MLPModel(object):
     class).
     """
 
-    def __init__(self, d_input, n_in, n_hidden, n_out):
+    def __init__(self, d_input, n_in, n_hidden, n_out, activation=T.tanh):
         """Initialize the parameters for the multilayer perceptron
 
         :type input: theano.tensor.TensorType
@@ -116,7 +116,7 @@ class _MLPModel(object):
             d_input=d_input,
             n_in=n_in,
             n_out=n_hidden,
-            activation=T.tanh
+            activation=activation
         )]
         for i in range(1, num_hidden_layers):
             self.hiddenLayers.append(
@@ -124,7 +124,7 @@ class _MLPModel(object):
                     d_input=self.hiddenLayers[i - 1].output,
                     n_in=n_hidden,
                     n_out=n_hidden,
-                    activation=T.tanh
+                    activation=activation
                 )
             )
 
@@ -171,7 +171,7 @@ class _MLPModel(object):
 
 class MLP(object):
     def __init__(self, n_in, n_hidden, n_out, num_hidden_layers=1, beta=0.01, 
-        L1_reg=0.00, L2_reg=0.0001):
+        L1_reg=0.00, L2_reg=0.0001, activation=T.tanh):
         
         if n_hidden == None:
             n_hidden = max(n_in, n_out)
@@ -188,7 +188,8 @@ class MLP(object):
         self.__mlp_model = _MLPModel(d_input=self.__x, 
             n_in=self.__n_in,
             n_hidden=self.__n_hidden,
-            n_out=self.__n_out)
+            n_out=self.__n_out,
+            activation=activation)
         self.__cost = (self.__mlp_model.negative_log_likelihood(self.__y) \
             + L1_reg * self.__mlp_model.L1 \
             + L2_reg * self.__mlp_model.L2_sqr

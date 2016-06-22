@@ -1,5 +1,7 @@
 from __future__ import print_function
 import numpy as np
+import matplotlib
+matplotlib.use('Qt4Agg')
 import matplotlib.pyplot as plt
 import gzip
 import cPickle as pkl
@@ -16,12 +18,14 @@ from sklearn.metrics import accuracy_score
 
 image_size = 28
 num_labels = 10
-force_training = True
-model_file = 'theano_MLP.model'
-beta = 0.01
+force_training = False
+model_file = 'theano_deep10_MLP.model'
+beta = 0.005
 batch_size = 100
-num_epochs = 60
+num_epochs = 240
 report_freq = 5
+model_commit_freq = 40
+num_hidden_layers=10
 
 
 train_dataset, train_labels, \
@@ -55,6 +59,13 @@ def load_model():
   else:
     logging.info('Successfully loaded model from disk.')
   return clf
+
+def commit_model(clf):
+  logging.info('Committing model to disk')
+  fp = gzip.open(model_file, 'wb')
+  pkl.dump(clf, fp)
+  logging.info('Committed model to disk')
+  return
 
 def train_model(clf):
   start_time = time.time()
@@ -90,12 +101,13 @@ def train_model(clf):
         clf.predict(valid_dataset)
       )
       logging.info('Epoch [%d] Cost %f, Validation Accurary %.2f%%'%(iepoch, cost, valid_acc * 100))
+    if epoch_costs and iepoch > 0 and iepoch % model_commit_freq == 0:
+      commit_model(clf)
   end_time = time.time()
   logging.info('Model training completed in %.0fs'%(end_time - start_time))
   plt.plot(np.arange(0, num_epochs), avg_costs)
   plt.show()
-  fp = gzip.open(model_file, 'wb')
-  pkl.dump(clf, fp)
+  commit_model(clf)
   return
 
 clf = load_model()
@@ -103,13 +115,15 @@ clf = load_model()
 if clf is None:
   clf = MLP(beta=beta, n_in=image_size * image_size,
     n_hidden=1024,
-    n_out=num_labels)
+    num_hidden_layers=num_hidden_layers,
+    n_out=num_labels,
+    activation=theano.tensor.nnet.sigmoid)
   train_model(clf)
 elif force_training:
   logging.info('force_training is set. Model will be retrained')
   train_model(clf)
 
 acc = accuracy_score(test_labels, clf.predict(test_dataset)) * 100
-logging.info('Model accuracy %f%%'%acc)
+logging.info('Model accuracy %.2f%%'%acc)
 
 
